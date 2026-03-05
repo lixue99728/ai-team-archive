@@ -73,14 +73,14 @@ ${context}
     }),
   })
 
-  const aiData = await aiRes.json()
+  const resText = await aiRes.text()
 
   if (!aiRes.ok) {
-    const errBody = await aiRes.text()
-    console.error('Gemini error:', aiRes.status, errBody)
-    return NextResponse.json({ error: `AI 接口调用失败 (${aiRes.status})：${errBody}` }, { status: 500 })
+    console.error('Gemini error:', aiRes.status, resText)
+    return NextResponse.json({ error: `AI 接口调用失败 (${aiRes.status})：${resText}` }, { status: 500 })
   }
 
+  const aiData = JSON.parse(resText)
   const text: string = aiData.candidates?.[0]?.content?.parts?.[0]?.text || ''
 
   try {
