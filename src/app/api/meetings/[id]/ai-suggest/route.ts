@@ -76,7 +76,9 @@ ${context}
   const aiData = await aiRes.json()
 
   if (!aiRes.ok) {
-    return NextResponse.json({ error: 'AI 接口调用失败，请重试' }, { status: 500 })
+    const errBody = await aiRes.text()
+    console.error('Gemini error:', aiRes.status, errBody)
+    return NextResponse.json({ error: `AI 接口调用失败 (${aiRes.status})：${errBody}` }, { status: 500 })
   }
 
   const text: string = aiData.candidates?.[0]?.content?.parts?.[0]?.text || ''
