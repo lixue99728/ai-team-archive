@@ -1,6 +1,10 @@
 'use client'
 import { useState } from 'react'
 import type { Todo, User } from '@/types'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { CheckSquare, Check } from 'lucide-react'
 
 export default function TodoSection({ meetingId, todos: initialTodos, allUsers, currentUser, onUpdate }: {
   meetingId: string
@@ -41,51 +45,68 @@ export default function TodoSection({ meetingId, todos: initialTodos, allUsers, 
   }
 
   return (
-    <section>
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">本次 Todo</h2>
-      <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
-        {todos.map(todo => (
-          <div key={todo.id} className="flex items-start gap-3">
-            <button onClick={() => toggleDone(todo)}
-              className={`mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
-                todo.done ? 'bg-green-500 border-green-500' : 'border-gray-300 hover:border-gray-400'
-              }`}>
-              {todo.done && (
-                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                </svg>
-              )}
-            </button>
-            <div className="flex-1 min-w-0">
-              <p className={`text-sm ${todo.done ? 'line-through text-gray-400' : 'text-gray-900'}`}>
-                {todo.content}
-              </p>
-              {todo.assignee && (
-                <p className="text-xs text-gray-500 mt-0.5">负责人：{(todo.assignee as any).name}</p>
-              )}
-            </div>
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-5 bg-blue-500 rounded-full" />
+          <div className="flex items-center gap-1.5">
+            <CheckSquare className="w-4 h-4 text-gray-500" />
+            <h2 className="font-semibold text-gray-900">本次 Todo</h2>
           </div>
-        ))}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-1">
+          {todos.map(todo => (
+            <div key={todo.id}
+              className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors">
+              <button
+                onClick={() => toggleDone(todo)}
+                className={`mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
+                  todo.done ? 'bg-green-500 border-green-500' : 'border-gray-300 hover:border-blue-400'
+                }`}
+              >
+                {todo.done && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+              </button>
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm ${todo.done ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                  {todo.content}
+                </p>
+                {todo.assignee && (
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    负责人：{(todo.assignee as any).name}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
 
-        <form onSubmit={addTodo} className="pt-2 border-t border-gray-100 space-y-2">
-          <input type="text" value={content} onChange={e => setContent(e.target.value)}
-            placeholder="添加待办事项..." required
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <form onSubmit={addTodo} className="mt-3 pt-3 border-t border-gray-100 space-y-2">
+          <Input
+            type="text"
+            value={content}
+            onChange={e => setContent(e.target.value)}
+            placeholder="添加待办事项..."
+            required
+          />
           <div className="flex items-center gap-2">
-            <select value={assigneeId} onChange={e => setAssigneeId(e.target.value)}
-              className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-600 focus:outline-none">
+            <select
+              value={assigneeId}
+              onChange={e => setAssigneeId(e.target.value)}
+              className="border border-input bg-background rounded-md px-2 py-1.5 text-sm text-gray-600 focus:outline-none focus:ring-1 focus:ring-ring"
+            >
               <option value="">不指派</option>
               {allUsers.map(u => (
                 <option key={u.id} value={u.id}>{u.name}</option>
               ))}
             </select>
-            <button type="submit" disabled={adding || !content.trim()}
-              className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+            <Button type="submit" disabled={adding || !content.trim()} size="sm">
               {adding ? '添加中...' : '添加'}
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   )
 }

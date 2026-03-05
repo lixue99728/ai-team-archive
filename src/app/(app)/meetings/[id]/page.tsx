@@ -1,18 +1,17 @@
 'use client'
 import { useState, useEffect, use } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import type { User } from '@/types'
 import MeetingSummary from './sections/meeting-summary'
 import MaterialsSection from './sections/materials-section'
 import TodoSection from './sections/todo-section'
 import AiSuggestion from './sections/ai-suggestion'
+import { CalendarDays } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 
 export default function MeetingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const [data, setData] = useState<any>(null)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const supabase = createClient()
-
   useEffect(() => {
     async function load() {
       const [meetingRes, profileRes] = await Promise.all([
@@ -35,20 +34,26 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">{meeting.title}</h1>
-        <p className="text-gray-500 mt-1">
-          {new Date(meeting.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
-        <div className="flex gap-2 mt-3">
-          {presenters.map((p: User) => (
-            <a key={p.id} href={`/members/${p.id}`}
-              className="text-sm bg-blue-50 text-blue-700 px-3 py-1 rounded-full hover:bg-blue-100">
-              {p.name}
-            </a>
-          ))}
+    <div className="space-y-6">
+      <div className="pb-4 border-b border-gray-100">
+        <h1 className="text-2xl font-bold text-gray-900">{meeting.title}</h1>
+        <div className="flex items-center gap-1.5 mt-2 text-sm text-gray-500">
+          <CalendarDays className="w-4 h-4" />
+          <span>
+            {new Date(meeting.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </span>
         </div>
+        {presenters.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-3">
+            {presenters.map((p: User) => (
+              <a key={p.id} href={`/members/${p.id}`}>
+                <Badge className="bg-blue-100 text-blue-700 border-0 hover:bg-blue-200 cursor-pointer">
+                  {p.name}
+                </Badge>
+              </a>
+            ))}
+          </div>
+        )}
       </div>
 
       <MeetingSummary meeting={meeting} isAdmin={isAdmin} onUpdate={reload} />

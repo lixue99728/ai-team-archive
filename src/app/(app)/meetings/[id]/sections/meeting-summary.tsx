@@ -1,6 +1,10 @@
 'use client'
 import { useState } from 'react'
 import type { Meeting } from '@/types'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { FileText } from 'lucide-react'
 
 export default function MeetingSummary({ meeting, isAdmin, onUpdate }: {
   meeting: Meeting
@@ -24,42 +28,50 @@ export default function MeetingSummary({ meeting, isAdmin, onUpdate }: {
   }
 
   return (
-    <section>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold text-gray-900">会议总结</h2>
-        {isAdmin && !editing && (
-          <button onClick={() => setEditing(true)}
-            className="text-sm text-blue-600 hover:text-blue-800">
-            {meeting.summary ? '编辑' : '添加总结'}
-          </button>
-        )}
-      </div>
-
-      {editing ? (
-        <div className="space-y-2">
-          <textarea value={text} onChange={e => setText(e.target.value)} rows={10}
-            placeholder="粘贴腾讯会议 AI 总结..."
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <div className="flex gap-2">
-            <button onClick={save} disabled={saving}
-              className="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
-              {saving ? '保存中...' : '保存'}
-            </button>
-            <button onClick={() => { setEditing(false); setText(meeting.summary || '') }}
-              className="text-gray-600 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-100">
-              取消
-            </button>
+    <Card>
+      <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-5 bg-blue-500 rounded-full" />
+          <div className="flex items-center gap-1.5">
+            <FileText className="w-4 h-4 text-gray-500" />
+            <h2 className="font-semibold text-gray-900">会议总结</h2>
           </div>
         </div>
-      ) : (
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          {meeting.summary ? (
-            <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{meeting.summary}</p>
-          ) : (
-            <p className="text-sm text-gray-400 italic">暂无总结</p>
-          )}
-        </div>
-      )}
-    </section>
+        {isAdmin && !editing && (
+          <Button variant="ghost" size="sm" onClick={() => setEditing(true)} className="text-blue-600 hover:text-blue-700 h-7">
+            {meeting.summary ? '编辑' : '添加总结'}
+          </Button>
+        )}
+      </CardHeader>
+      <CardContent>
+        {editing ? (
+          <div className="space-y-3">
+            <Textarea
+              value={text}
+              onChange={e => setText(e.target.value)}
+              rows={10}
+              placeholder="粘贴腾讯会议 AI 总结..."
+              className="text-sm resize-none"
+            />
+            <div className="flex gap-2">
+              <Button onClick={save} disabled={saving} size="sm">
+                {saving ? '保存中...' : '保存'}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => { setEditing(false); setText(meeting.summary || '') }}>
+                取消
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="min-h-16">
+            {meeting.summary ? (
+              <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{meeting.summary}</p>
+            ) : (
+              <p className="text-sm text-gray-400 italic">暂无总结</p>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

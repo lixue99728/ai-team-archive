@@ -1,7 +1,11 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Paperclip } from 'lucide-react'
 import type { MeetingMaterial, User } from '@/types'
 
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
@@ -27,7 +31,7 @@ function MaterialItem({ material, canDelete, onDelete }: {
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg p-3">
+    <div className="border border-gray-100 rounded-lg p-3 bg-gray-50/50 hover:bg-gray-50 transition-colors">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full shrink-0">
@@ -61,10 +65,10 @@ function MaterialItem({ material, canDelete, onDelete }: {
       {expanded && material.type === 'file' && signedUrl && (
         <div className="mt-3 pt-3 border-t border-gray-100">
           {IMAGE_TYPES.includes(material.mime_type || '') && (
-            <img src={signedUrl} alt={material.title} className="max-w-full rounded" />
+            <Image src={signedUrl} alt={material.title} width={800} height={600} className="max-w-full rounded h-auto" unoptimized />
           )}
           {material.mime_type === PDF_TYPE && (
-            <iframe src={signedUrl} className="w-full h-96 rounded" />
+            <iframe src={signedUrl} className="w-full h-96 rounded" sandbox="allow-scripts allow-same-origin" title={material.title} />
           )}
         </div>
       )}
@@ -99,7 +103,9 @@ function AddMaterialForm({ meetingId, onAdd }: { meetingId: string; onAdd: () =>
   }
 
   if (!open) return (
-    <button onClick={() => setOpen(true)} className="text-sm text-blue-600 hover:text-blue-800">+ 添加资料</button>
+    <Button variant="ghost" size="sm" onClick={() => setOpen(true)} className="text-blue-600 h-7 px-2">
+      + 添加资料
+    </Button>
   )
 
   return (
@@ -129,12 +135,12 @@ function AddMaterialForm({ meetingId, onAdd }: { meetingId: string; onAdd: () =>
           className="w-full text-sm text-gray-600" />
       )}
       <div className="flex gap-2">
-        <button type="submit" disabled={loading}
-          className="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+        <Button type="submit" disabled={loading} size="sm">
           {loading ? '上传中...' : '添加'}
-        </button>
-        <button type="button" onClick={() => setOpen(false)}
-          className="text-gray-600 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-100">取消</button>
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
+          取消
+        </Button>
       </div>
     </form>
   )
@@ -154,32 +160,40 @@ export default function MaterialsSection({ meetingId, materials, presenters, cur
   }
 
   return (
-    <section>
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">成员分享</h2>
-      <div className="space-y-4">
-        {presenters.map(presenter => {
-          const presenterMaterials = materials.filter(m => m.user_id === presenter.id)
-          const isMe = currentUser?.id === presenter.id
-
-          return (
-            <div key={presenter.id} className="bg-white rounded-xl border border-gray-200 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-medium text-gray-900">{presenter.name}</h3>
-                {isMe && <AddMaterialForm meetingId={meetingId} onAdd={onUpdate} />}
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-5 bg-blue-500 rounded-full" />
+          <div className="flex items-center gap-1.5">
+            <Paperclip className="w-4 h-4 text-gray-500" />
+            <h2 className="font-semibold text-gray-900">成员分享</h2>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {presenters.map(presenter => {
+            const presenterMaterials = materials.filter(m => m.user_id === presenter.id)
+            const isMe = currentUser?.id === presenter.id
+            return (
+              <div key={presenter.id} className="border border-gray-100 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-medium text-gray-900 text-sm">{presenter.name}</h3>
+                  {isMe && <AddMaterialForm meetingId={meetingId} onAdd={onUpdate} />}
+                </div>
+                <div className="space-y-2">
+                  {presenterMaterials.map(m => (
+                    <MaterialItem key={m.id} material={m} canDelete={isMe} onDelete={() => deleteMaterial(m.id)} />
+                  ))}
+                  {presenterMaterials.length === 0 && (
+                    <p className="text-sm text-gray-400 italic">暂未上传资料</p>
+                  )}
+                </div>
               </div>
-              <div className="space-y-2">
-                {presenterMaterials.map(m => (
-                  <MaterialItem key={m.id} material={m} canDelete={isMe}
-                    onDelete={() => deleteMaterial(m.id)} />
-                ))}
-                {presenterMaterials.length === 0 && (
-                  <p className="text-sm text-gray-400 italic">暂未上传资料</p>
-                )}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </section>
+            )
+          })}
+        </div>
+      </CardContent>
+    </Card>
   )
 }

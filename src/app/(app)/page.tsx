@@ -28,11 +28,15 @@ export default async function HomePage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">会议记录</h1>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">会议记录</h1>
+          <p className="text-sm text-gray-500 mt-1">团队知识共享与回顾</p>
+        </div>
         {profile?.role === 'admin' && (
           <Link href="/meetings/new"
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
+            className="inline-flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+            <span className="text-base leading-none">+</span>
             新建会议
           </Link>
         )}
@@ -53,7 +57,9 @@ export default async function HomePage() {
           />
         ))}
         {(!meetings || meetings.length === 0) && (
-          <div className="text-center text-gray-500 py-12">还没有会议记录</div>
+          <div className="text-center text-gray-400 py-16 border border-dashed border-gray-200 rounded-xl">
+            还没有会议记录
+          </div>
         )}
       </div>
     </div>
