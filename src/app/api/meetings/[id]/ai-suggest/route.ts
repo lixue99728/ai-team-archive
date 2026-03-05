@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-const AI_API_URL = process.env.INTERNAL_AI_API_URL!
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY!
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -63,24 +64,22 @@ ${context}
   "reasoning": "建议依据"
 }`
 
-  const aiRes = await fetch(AI_API_URL, {
+  const aiRes = await fetch(GEMINI_API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      prompt: userPrompt,
-      model: 'gpt-4o',
-      temperature: 0,
-      max_output_tokens: 1024,
+      contents: [{ parts: [{ text: userPrompt }] }],
+      generationConfig: { temperature: 0, maxOutputTokens: 1024 },
     }),
   })
 
   const aiData = await aiRes.json()
 
-  if (aiData.code !== 0) {
+  if (!aiRes.ok) {
     return NextResponse.json({ error: 'AI 接口调用失败，请重试' }, { status: 500 })
   }
 
-  const text: string = aiData.data?.content || ''
+  const text: string = aiData.candidates?.[0]?.content?.parts?.[0]?.text || ''
 
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/)
