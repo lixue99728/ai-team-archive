@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { X, Copy, Check, ExternalLink, Download } from 'lucide-react'
@@ -11,11 +11,20 @@ const PDF_TYPE = 'application/pdf'
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   async function handleCopy() {
     await navigator.clipboard.writeText(text)
     setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => setCopied(false), 1500)
   }
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
   return (
     <button onClick={handleCopy}
       className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 px-2 py-1 rounded hover:bg-gray-100">
@@ -29,11 +38,15 @@ function DrawerContent({ material }: { material: MeetingMaterial }) {
   const [fileUrl, setFileUrl] = useState('')
 
   useEffect(() => {
-    if (material.type === 'file') {
-      fetch(`/api/materials/${material.id}/url`)
-        .then(r => r.json())
-        .then(d => setFileUrl(d.url || ''))
-    }
+    if (material.type !== 'file') return
+    const controller = new AbortController()
+    fetch(`/api/materials/${material.id}/url`, { signal: controller.signal })
+      .then(r => r.json())
+      .then(d => setFileUrl(d.url || ''))
+      .catch(err => {
+        if (err.name !== 'AbortError') setFileUrl('error')
+      })
+    return () => controller.abort()
   }, [material.id, material.type])
 
   if (material.type === 'link') {
@@ -64,6 +77,10 @@ function DrawerContent({ material }: { material: MeetingMaterial }) {
   // file type
   if (!fileUrl) {
     return <div className="p-4 text-sm text-gray-400">加载中...</div>
+  }
+
+  if (fileUrl === 'error') {
+    return <div className="p-4 text-sm text-red-500">加载失败，请重试</div>
   }
 
   if (IMAGE_TYPES.includes(material.mime_type || '')) {
