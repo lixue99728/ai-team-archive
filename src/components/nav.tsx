@@ -25,6 +25,11 @@ export default function Nav({ user }: { user: User | null }) {
           AI 小队
         </Link>
         <div className="flex items-center gap-1">
+          {user?.id && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/materials" className="text-gray-600">资料</Link>
+            </Button>
+          )}
           {user?.role === 'admin' && (
             <Button variant="ghost" size="sm" asChild>
               <Link href="/admin/invites" className="text-gray-600">邀请管理</Link>
