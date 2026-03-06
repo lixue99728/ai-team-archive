@@ -124,7 +124,7 @@ function AddMaterialForm({ meetingId, onAdd }: { meetingId: string; onAdd: () =>
           {queue.map((item, idx) => (
             <div key={idx} className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-gray-200">
               <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full shrink-0">
-                {item.kind === 'file' ? '文件' : detectType((item as { kind: 'text'; text: string; title: string }).text) === 'link' ? '链接' : 'MD'}
+                {item.kind === 'file' ? '文件' : detectType(item.text) === 'link' ? '链接' : 'MD'}
               </span>
               <input
                 type="text"
