@@ -83,11 +83,13 @@ export default function MaterialsPage() {
                   </td>
                   <td className="px-4 py-3 text-gray-600">{m.users?.name}</td>
                   <td className="px-4 py-3">
-                    <Link href={`/meetings/${m.meetings?.id}`}
-                      onClick={e => e.stopPropagation()}
-                      className="text-blue-600 hover:text-blue-800">
-                      {m.meetings?.title}
-                    </Link>
+                    {m.meetings ? (
+                      <Link href={`/meetings/${m.meetings.id}`}
+                        onClick={e => e.stopPropagation()}
+                        className="text-blue-600 hover:text-blue-800">
+                        {m.meetings.title}
+                      </Link>
+                    ) : '-'}
                   </td>
                   <td className="px-4 py-3 text-gray-500">
                     {m.meetings?.date
