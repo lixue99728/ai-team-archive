@@ -6,12 +6,13 @@ import MaterialDrawer from '@/components/material-drawer'
 import type { MeetingMaterial } from '@/types'
 
 type MaterialWithContext = MeetingMaterial & {
-  users: { id: string; name: string }
-  meetings: { id: string; title: string; date: string }
+  users: { id: string; name: string } | null
+  meetings: { id: string; title: string; date: string } | null
 }
 
 export default function MaterialsPage() {
   const [materials, setMaterials] = useState<MaterialWithContext[]>([])
+  const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [drawerMaterial, setDrawerMaterial] = useState<MeetingMaterial | null>(null)
 
@@ -19,6 +20,8 @@ export default function MaterialsPage() {
     fetch('/api/materials')
       .then(r => r.json())
       .then(d => setMaterials(d.materials || []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
 
   const filtered = useMemo(() => {
@@ -51,7 +54,9 @@ export default function MaterialsPage() {
 
       {/* 列表 */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <p className="text-sm text-gray-400 p-6 text-center">加载中...</p>
+        ) : filtered.length === 0 ? (
           <p className="text-sm text-gray-400 p-6 text-center">暂无资料</p>
         ) : (
           <table className="w-full text-sm">
@@ -85,9 +90,11 @@ export default function MaterialsPage() {
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-gray-500">
-                    {new Date(m.meetings?.date).toLocaleDateString('zh-CN', {
-                      year: 'numeric', month: 'short', day: 'numeric'
-                    })}
+                    {m.meetings?.date
+                      ? new Date(m.meetings.date).toLocaleDateString('zh-CN', {
+                          year: 'numeric', month: 'short', day: 'numeric'
+                        })
+                      : '-'}
                   </td>
                 </tr>
               ))}
